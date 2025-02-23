@@ -28,6 +28,8 @@ The Job Board Backend is a case study in creating a scalable, feature-rich backe
 | **PostgreSQL** | Relational database for storing and querying job data     |
 | **JWT**        | JSON Web Tokens for secure, role-based authentication     |
 | **Swagger**    | Interactive API documentation for developers              |
+| **Redis**      | In-memory database for caching                            |
+| **Celery**     | Asynchronous task queue system, email notification        |
 
 ## Key Features
 
