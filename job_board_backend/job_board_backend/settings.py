@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # Third party apps
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'drf_yasg',
 ]
 
@@ -147,4 +148,5 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Access token expires in 1 hour
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # Refresh token lasts 1 day
     'AUTH_HEADER_TYPES': ('Bearer',),                # Use 'Bearer' in Authorization header
+    'BLACKLIST_AFTER_ROTATION': True,
 }
