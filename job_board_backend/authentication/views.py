@@ -143,9 +143,19 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
+        """
+        Retrieve the authenticated user's profile based on their role.
+
+        - Job Seekers: Returns or creates a JobSeekerProfile.
+        - Employers: Returns or creates an EmployerProfile with a default company name.
+        - Admins: Raises 404 as they have no profile.
+
+        Raises:
+            Http404: If the user is not authenticated or has an invalid role.
+        """
         user = self.request.user
         if not user.is_authenticated:
-            raise Http404("Authentication required")  # This will trigger 401 via permissions for real requests
+            raise Http404("Authentication required")  # Triggers 401 via IsAuthenticated
         if user.role == 'job_seeker':
             profile, created = JobSeekerProfile.objects.get_or_create(user=user)
             return profile
@@ -159,11 +169,18 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         raise Http404("No profile exists for this user's role")
 
     def get_serializer_class(self):
+        """
+        Dynamically return the appropriate serializer based on the user's role.
+
+        - Job Seekers: JobSeekerProfileSerializer.
+        - Employers: EmployerProfileSerializer.
+        - Admins: Raises 404.
+
+        Handles Swagger schema generation by defaulting to JobSeekerProfileSerializer.
+        """
         user = self.request.user
-        # Allow Swagger schema generation without raising exceptions
         if getattr(self, 'swagger_fake_view', False) or not user.is_authenticated:
-            # Default to JobSeekerProfileSerializer for schema purposes (or choose EmployerProfileSerializer)
-            return JobSeekerProfileSerializer
+            return JobSeekerProfileSerializer  # Default for Swagger
         if user.role == 'job_seeker':
             return JobSeekerProfileSerializer
         elif user.role == 'employer':
@@ -172,13 +189,70 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             raise Http404("Admins do not have profiles")
         raise Http404("Invalid role for profile access")
 
-    
+    @swagger_auto_schema(
+        operation_summary="Retrieve User Profile",
+        operation_description="""
+        Retrieves the authenticated user's profile based on their role:
+        - Job Seekers: Returns JobSeekerProfile with skills, resume, and experience.
+        - Employers: Returns EmployerProfile with company_name and website.
+        - Admins: Not supported (404).
+        Includes user details (first_name, last_name, phone_number, email, is_email_verified, role).
+        Requires JWT authentication via the `Authorization` header (e.g., `Bearer <token>`).
+        """,
+        responses={
+            200: openapi.Response(
+                description="User profile retrieved successfully",
+                examples={
+                    'application/json': {
+                        'job_seeker': {
+                            "id": "ae6e63e2-618d-4957-90b7-dba945cc3c81",
+                            "first_name": "Jane",
+                            "last_name": "Doe",
+                            "phone_number": "1234567890",
+                            "email": "jane@example.com",
+                            "is_email_verified": False,
+                            "role": "job_seeker",
+                            "skills": "Python, Django",
+                            "resume": "file",
+                            "experience": "5 years"
+                        },
+                        'employer': {
+                            "id": "ae6e63e2-618d-4957-90b7-dba945cc3c81",
+                            "first_name": "Tobenna",
+                            "last_name": "Obiasor",
+                            "phone_number": "07068669403",
+                            "email": "tobennaobiasor@gmail.com",
+                            "is_email_verified": False,
+                            "role": "employer",
+                            "company_name": "ABCD company",
+                            "website": None
+                        }
+                    }
+                }
+            ),
+            401: openapi.Response(
+                description="Unauthorized - Invalid or missing JWT token",
+                examples={"application/json": {"detail": "Authentication credentials were not provided."}}
+            ),
+            404: openapi.Response(
+                description="Not Found - Profile not available for this role (e.g., admin)",
+                examples={"application/json": {"detail": "Not found."}}
+            )
+        }
+    )
     def get(self, request, *args, **kwargs):
         """Handle GET request to retrieve the user's profile."""
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_description="Update the authenticated user's profile (partial updates allowed).",
+        operation_summary="Partially Update User Profile",
+        operation_description="""
+        Updates the authenticated user's profile (partial updates allowed). Fields depend on role:
+        - Job Seekers: Can update user fields (first_name, last_name, phone_number) and profile fields (skills, resume, experience).
+        - Employers: Can update user fields and profile fields (company_name, website).
+        - Admins: Not supported (404).
+        Requires JWT authentication via the `Authorization` header (e.g., `Bearer <token>`).
+        """,
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
@@ -206,8 +280,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
                                 "phone_number": "1234567890",
                                 "email": "jane@example.com",
                                 "is_email_verified": False,
-                                "role": "job_seeker",
-                                
+                                "role": "job_seeker"
                             },
                             "skills": "Python, Django",
                             "resume": "file",
@@ -229,11 +302,29 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
                     }
                 }
             ),
-            400: "Invalid data provided",
-            401: "Authentication required",
-            404: "Profile not found for this role"
+            400: openapi.Response(
+                description="Bad request - Invalid data provided",
+                examples={"application/json": {"phone_number": "Invalid format."}}
+            ),
+            401: openapi.Response(
+                description="Unauthorized - Invalid or missing JWT token",
+                examples={"application/json": {"detail": "Authentication credentials were not provided."}}
+            ),
+            404: openapi.Response(
+                description="Not Found - Profile not available for this role (e.g., admin)",
+                examples={"application/json": {"detail": "Not found."}}
+            )
         }
     )
+    def patch(self, request, *args, **kwargs):
+        """
+        Handle PATCH request to partially update the user's profile.
+
+        Allows partial updates to fields based on the user's role.
+        """
+        kwargs["partial"] = True
+        return self.update(request, *args, **kwargs)
+
     def update(self, request, *args, **kwargs):
         """Allows partial updates to the user's profile."""
         kwargs["partial"] = True

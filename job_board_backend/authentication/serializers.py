@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import User, JobSeekerProfile, EmployerProfile
+from jobs.serializers import JobPostingSerializer
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for retrieving and displaying user details."""
@@ -76,6 +77,9 @@ class EmployerProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email', read_only=True)  # Keep email read-only to prevent changes
     is_email_verified = serializers.BooleanField(source='user.is_email_verified', read_only=True)
     role = serializers.CharField(source='user.role', read_only=True)
+
+    # Add jobs_posted field
+    # jobs_posted = JobPostingSerializer(many=True, read_only=True, source='user.jobs_posted')
 
     class Meta:
         model = EmployerProfile

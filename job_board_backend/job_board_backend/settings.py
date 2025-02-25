@@ -1,6 +1,7 @@
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+from dj_database_url import parse as db_url
 
 load_dotenv()
 
@@ -78,16 +79,16 @@ WSGI_APPLICATION = 'job_board_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('ENGINE'),
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('USER'),
-        'PASSWORD': os.getenv('PASSWORD'),
-        'HOST': os.getenv('HOST'),  # Matches the service name in docker-compose.yml
-        'PORT': os.getenv('PORT'),
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': os.getenv('ENGINE'),
+#         'NAME': os.getenv('DB_NAME'),
+#         'USER': os.getenv('USER'),
+#         'PASSWORD': os.getenv('PASSWORD'),
+#         'HOST': os.getenv('HOST'),  # Matches the service name in docker-compose.yml
+#         'PORT': os.getenv('PORT'),
+#     }
+# }
 
 
 # Password validation
@@ -150,3 +151,24 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),                # Use 'Bearer' in Authorization header
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+# Database
+DATABASES = {
+    'default': db_url(os.getenv('DATABASE_URL'))
+}
+
+# Celery Configuration
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = f"Your Job Board <{os.getenv('EMAIL_HOST_USER')}>"

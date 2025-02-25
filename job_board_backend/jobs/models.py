@@ -61,11 +61,12 @@ class JobPosting(models.Model):
         related_name='jobs'
     )
     job_type = models.CharField(max_length=20, choices=JOB_TYPES)
-    posted_by = models.ForeignKey(
+    employer = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='jobs_posted'
     )
+    salary = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
