@@ -1,0 +1,3 @@
+DROP DATABASE job_board_db;
+CREATE DATABASE job_board_db OWNER drplain;
+GRANT ALL PRIVILEGES ON DATABASE job_board_db TO drplain;
