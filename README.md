@@ -25,13 +25,20 @@ The Job Board Backend is a case study in creating a scalable, feature-rich backe
 | **Technology** | **Purpose**                       |
 |-----------------|------------------------------------|
 | **Django**     | High-level Python framework for rapid, secure development |
+| **Django_Rest_framework**     | High-level Python framework for rapid, secure, API development |
 | **PostgreSQL** | Relational database for storing and querying job data     |
 | **JWT**        | JSON Web Tokens for secure, role-based authentication     |
 | **Swagger**    | Interactive API documentation for developers              |
 | **Redis**      | In-memory database for caching                            |
 | **Celery**     | Asynchronous task queue system, email notification        |
+| **Docker**     | Containerization        |
+| **Docker-compose**     | Building and running multiple services       |
+| **Git flow**     | Version control strategy        |
 
 ## Key Features
+
+### Authentication
+- Secure registration and login with JWT authentication for `job_seeker`, `employer`, and `admin` roles.
 
 ### Job Posting Management
 - APIs to create, update, delete, and retrieve job postings.
@@ -39,25 +46,57 @@ The Job Board Backend is a case study in creating a scalable, feature-rich backe
 
 ### Role-Based Authentication
 - **Admins**: Manage job listings, categories, and oversee platform operations.
-- **Users**: Apply to jobs, track applications, and explore opportunities.
+- **job_seekers**: Apply to jobs, track applications, and explore opportunities.
+- **employers**: Post jobs, update application status and retrieve all jobs they posted
 
 ### Optimized Job Search
 - Lightning-fast filtering with database indexing.
 - Search by location, category, or custom criteria with optimized queries.
 
+### Email notification
+- Asynchronous emails triggered by application submission and acceptance, powered by Celery and Redis.
+
+### Pagination
+- Efficient list retrieval with configurable page sizes for jobs and applications.
+
+### Containerization
+- Docker Compose setup with PostgreSQL, Redis, Django, and Celery services.
+
+### Testing
+- Comprehensive unit tests ensuring reliability.
+
 ### API Documentation
 - Fully documented endpoints using Swagger.
 - Accessible at `/api/docs` for easy frontend integration.
 
-## Getting Started
 
-### Prerequisites
-- Python 3.9+
-- PostgreSQL 13+
-- Git
-
-### Installation
+## Setup, Installation and running the app
 1. **Clone the Repository**  
    ```bash
-   git clone https://github.com/yourusername/job-board-backend.git
-   cd job-board-backend
+   git clone https://github.com/DrPlain/alx-project-nexus.git
+
+2. **CD into project directory and install requiremnts** 
+   ```bash
+   cd alx-project-nexus/job-board-backend
+   pip3 install -r requirements.txt
+
+3. **Create a .env file in the project root using the sample below** 
+   ```plaintext
+   # PostgreSQL Configuration
+   POSTGRES_DB=job_board_db
+   POSTGRES_USER=job_board_user
+   POSTGRES_PASSWORD=job_board_password
+   DATABASE_URL=postgres://job_board_user:job_board_password@db:5432/job_board_db
+
+   # Redis Configuration
+   REDIS_PASSWORD=redis_password
+   CELERY_BROKER_URL=redis://:redis_password@redis:6379/0
+   CELERY_RESULT_BACKEND=redis://:redis_password@redis:6379/0
+
+   # Email Configuration (e.g., Gmail SMTP)
+   EMAIL_HOST_USER=your-email@gmail.com
+   EMAIL_HOST_PASSWORD=your-app-password
+
+3. **Run project using docker-compose** 
+   ```bash
+   docker-compose up --build
