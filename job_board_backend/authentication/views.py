@@ -40,7 +40,6 @@ class RegisterView(generics.CreateAPIView):
 
         # Combine profile data with message
         response_data = profile_serializer.data
-        response_data["message"] = "User registered successfully"
         return Response(response_data, status=status.HTTP_201_CREATED)
 
 class LogoutView(generics.GenericAPIView):
