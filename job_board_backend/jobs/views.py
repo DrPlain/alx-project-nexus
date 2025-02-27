@@ -1,10 +1,11 @@
 # jobs/views.py (assuming this is the file based on context)
-from rest_framework import generics, status
-from rest_framework.response import Response
+from rest_framework import generics
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import IsAdminUser, IsEmployer, IsJobOwner, IsJobSeeker
 from .models import JobPosting
 from .serializers import JobPostingSerializer
+from .filters import JobPostingFilter
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -18,6 +19,8 @@ class JobPostingListCreateView(generics.ListCreateAPIView):
     """
     serializer_class = JobPostingSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = JobPostingFilter
 
     def get_permissions(self):
         """
@@ -35,8 +38,8 @@ class JobPostingListCreateView(generics.ListCreateAPIView):
         """
         user = self.request.user
         if user.role == 'employer':
-            return JobPosting.objects.filter(employer=user)
-        return JobPosting.objects.filter(is_active=True)
+            return JobPosting.objects.filter(employer=user).order_by('-created_at')
+        return JobPosting.objects.filter(is_active=True).order_by('-created_at')
 
     @swagger_auto_schema(
         operation_summary="List Job Postings",
