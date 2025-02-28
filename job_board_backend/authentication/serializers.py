@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import User, JobSeekerProfile, EmployerProfile
-from jobs.serializers import JobPostingSerializer
+from .models import User, JobSeekerProfile, EmployerProfile, VerificationToken
+from .tasks import send_verification_email
+
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for retrieving and displaying user details."""
@@ -57,6 +58,10 @@ class RegisterSerializer(serializers.ModelSerializer):
             JobSeekerProfile.objects.create(user=user)
         elif user.role == 'employer':
             EmployerProfile.objects.create(user=user)
+        
+        # Create verification token and send email
+        token = VerificationToken.objects.create(user=user)
+        send_verification_email.delay(user.id, str(token.token))
         return user
 
 class LoginSerializer(serializers.Serializer):
@@ -129,3 +134,8 @@ class JobSeekerProfileSerializer(serializers.ModelSerializer):
 
         # Update JobSeekerProfile fields
         return super().update(instance, validated_data)
+    
+class VerificationTokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VerificationToken
+        fields = ['token']

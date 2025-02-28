@@ -1,11 +1,10 @@
 from rest_framework import generics, status
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
-from .models import User, EmployerProfile, JobSeekerProfile
-from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, JobSeekerProfileSerializer, EmployerProfileSerializer
+from .models import User, EmployerProfile, JobSeekerProfile, VerificationToken
+from .serializers import UserSerializer, RegisterSerializer, VerificationTokenSerializer, JobSeekerProfileSerializer, EmployerProfileSerializer
 from drf_yasg.utils import swagger_auto_schema
 from django.http import Http404
 from drf_yasg import openapi
@@ -332,3 +331,21 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+    
+class VerifyEmailView(generics.GenericAPIView):
+    serializer_class = VerificationTokenSerializer
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        token = request.query_params.get('token')
+        try:
+            verification_token = VerificationToken.objects.get(token=token)
+            user = verification_token.user
+            if not user.is_email_verified:
+                user.is_email_verified = True
+                user.save()
+                verification_token.delete()  # Token is single-use
+                return Response({"message": "Email verified successfully"}, status=status.HTTP_200_OK)
+            return Response({"message": "Email already verified"}, status=status.HTTP_200_OK)
+        except VerificationToken.DoesNotExist:
+            return Response({"error": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)

@@ -78,7 +78,6 @@ The Job Board Backend is a case study in creating a scalable, feature-rich backe
 2. **CD into project directory and install requiremnts** 
    ```bash
    cd alx-project-nexus/job-board-backend
-   pip3 install -r requirements.txt
 
 3. **Create a .env file in the project root using the sample below** 
    ```plaintext
