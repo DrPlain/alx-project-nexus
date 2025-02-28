@@ -1,14 +1,6 @@
 # Job Board Backend
 
-Welcome to the **Job Board Backend** project! This is a powerful, real-world backend system designed to power a job board platform with robust role management, efficient data retrieval, and seamless API integration. Whether you're a developer looking to sharpen your skills or a team building a scalable job platform, this project offers hands-on experience with modern backend development practices.
-
-## Real-World Application
-
-This project prepares you to build production-ready backend systems by tackling challenges faced by platforms like Indeed, LinkedIn Jobs, or local job boards. Through this project, you'll gain practical skills in:
-
-- **Role-Based Access Control (RBAC)**: Securely manage permissions for admins and users with JWT authentication.
-- **Database Design**: Craft efficient schemas to handle complex relationships and large datasets.
-- **Query Optimization**: Boost performance with indexing and advanced search techniques.
+Welcome to the **Job Board Backend** project! This is a powerful, real-world backend system designed to power a job board platform with robust role management, efficient data retrieval, and seamless API integration with modern backend development practices.
 
 ## Project Overview
 
@@ -99,3 +91,6 @@ The Job Board Backend is a case study in creating a scalable, feature-rich backe
 3. **Run project using docker-compose** 
    ```bash
    docker-compose up --build
+
+4. **Access the endpoint below for API documentation** 
+   `http://localhost:8000/api/docs/`
