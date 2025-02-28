@@ -47,6 +47,7 @@ class JobPostingListCreateView(generics.ListCreateAPIView):
         Retrieves a list of job postings based on the authenticated user's role:
         - Employers: See only their own job postings.
         - Job Seekers/Admins: See all active job postings.
+        - Allow filtering via query parameters for `title`, `description`, `category`, `country`, `city`, `salary` (returns all values greater than or equal to given value)
         Returns job postings with nested location details (country, city, address).
         Requires JWT authentication via the `Authorization` header (e.g., `Bearer <token>`).
         """,

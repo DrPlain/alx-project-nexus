@@ -11,6 +11,7 @@ Django==5.1.6
 django-filter==25.1
 djangorestframework==3.15.2
 djangorestframework_simplejwt==5.4.0
+drf-nested-routers==0.94.1
 drf-yasg==1.21.8
 inflection==0.5.1
 kombu==5.4.2
