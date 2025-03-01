@@ -139,3 +139,10 @@ class VerificationTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = VerificationToken
         fields = ['token']
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    token = serializers.UUIDField()
+    new_password = serializers.CharField(write_only=True)

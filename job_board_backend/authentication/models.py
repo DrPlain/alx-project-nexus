@@ -90,14 +90,6 @@ class User(AbstractUser):
         verbose_name = "User"
         verbose_name_plural = "Users"
 
-class VerificationToken(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='verification_token')
-    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Token for {self.user.username}"
-
 class JobSeekerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='job_seeker_profile')
     resume = models.FileField(upload_to='resumes/', blank=True, null=True)
@@ -109,3 +101,20 @@ class EmployerProfile(models.Model):
     company_name = models.CharField(max_length=255, blank=True, null=True)
     website = models.URLField(blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
+
+class VerificationToken(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='verification_token')
+    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Token for {self.user.username}"
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_reset_tokens')
+    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True)  # Optional: Add expiration logic
+
+    def __str__(self):
+        return f"Reset token for {self.user.username}"

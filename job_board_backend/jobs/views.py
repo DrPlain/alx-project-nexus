@@ -2,12 +2,13 @@
 from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
-from authentication.permissions import IsAdminUser, IsEmployer, IsJobOwner, IsJobSeeker
+from authentication.permissions import IsEmployer, IsJobOwner
 from .models import JobPosting
 from .serializers import JobPostingSerializer
 from .filters import JobPostingFilter
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.core.cache import cache
 
 class JobPostingListCreateView(generics.ListCreateAPIView):
     """
@@ -37,10 +38,28 @@ class JobPostingListCreateView(generics.ListCreateAPIView):
         - Job Seekers/Admins: See all active jobs.
         """
         user = self.request.user
-        if user.role == 'employer':
-            return JobPosting.objects.filter(employer=user).order_by('-created_at')
-        return JobPosting.objects.filter(is_active=True).order_by('-created_at')
+        base_queryset = JobPosting.objects.select_related('employer', 'location')
 
+        if user.role == 'employer':
+            # Employer-specific queryset: filter by user, no caching needed as it’s user-specific
+            return base_queryset.filter(employer=user).order_by('-created_at')
+        else:
+            # Job seekers and admins: fetch active jobs, cache for performance
+            cache_key = 'active_jobs_queryset'
+            cached_queryset = cache.get(cache_key)
+            if cached_queryset is None:
+                cached_queryset = base_queryset.filter(is_active=True).order_by('-created_at')
+                # Cache for 15 minutes (adjust based on update frequency)
+                cache.set(cache_key, cached_queryset, 15 * 60)
+            return cached_queryset
+
+    def perform_create(self, serializer):
+        """Save a new job posting and invalidate the active jobs cache."""
+        job = serializer.save(employer=self.request.user)
+        # Invalidate cache since a new active job is added
+        cache.delete('active_jobs_queryset')
+        return job
+    
     @swagger_auto_schema(
         operation_summary="List Job Postings",
         operation_description="""

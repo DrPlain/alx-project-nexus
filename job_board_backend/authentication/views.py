@@ -3,8 +3,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
-from .models import User, EmployerProfile, JobSeekerProfile, VerificationToken
-from .serializers import UserSerializer, RegisterSerializer, VerificationTokenSerializer, JobSeekerProfileSerializer, EmployerProfileSerializer
+from .models import User, EmployerProfile, JobSeekerProfile, VerificationToken, PasswordResetToken
+from .serializers import UserSerializer, RegisterSerializer, VerificationTokenSerializer, JobSeekerProfileSerializer, EmployerProfileSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer
+from .tasks import send_password_reset_email
 from drf_yasg.utils import swagger_auto_schema
 from django.http import Http404
 from drf_yasg import openapi
@@ -333,6 +334,14 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         return Response(serializer.data)
     
 class VerifyEmailView(generics.GenericAPIView):
+    """
+    A view for verifying a user's email address using a token.
+
+    This view handles GET requests to verify a user's email address by validating a unique token
+    provided as a query parameter.
+
+    A query parameter named `token` must be passed to the view
+    """
     serializer_class = VerificationTokenSerializer
     permission_classes = [AllowAny]
 
@@ -348,4 +357,52 @@ class VerifyEmailView(generics.GenericAPIView):
                 return Response({"message": "Email verified successfully"}, status=status.HTTP_200_OK)
             return Response({"message": "Email already verified"}, status=status.HTTP_200_OK)
         except VerificationToken.DoesNotExist:
+            return Response({"error": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
+        
+class PasswordResetRequestView(generics.GenericAPIView):
+    """
+    A view for requesting a password reset.
+
+    Accepts an email address, generates a reset token if the email exists, 
+    and sends a reset email asynchronously. Returns success even if the email 
+    doesn’t exist to prevent email enumeration attacks.
+    """
+    serializer_class = PasswordResetRequestSerializer
+    permission_classes = [AllowAny]  # Open to anyone
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        try:
+            user = User.objects.get(email=email)
+            token = PasswordResetToken.objects.create(user=user)
+            send_password_reset_email.delay(user.id, str(token.token))
+            return Response({"message": "Password reset email sent"}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"message": "Password reset email sent"}, status=status.HTTP_200_OK)
+
+class PasswordResetConfirmView(generics.GenericAPIView):
+    """
+    A view for confirming a password reset.
+
+    Accepts a reset token and new password, verifies the token, updates the 
+    user’s password if valid, and deletes the token to prevent reuse.
+    """
+    serializer_class = PasswordResetConfirmSerializer
+    permission_classes = [AllowAny]  # Open to anyone with a valid token
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        token = serializer.validated_data['token']
+        new_password = serializer.validated_data['new_password']
+        try:
+            reset_token = PasswordResetToken.objects.get(token=token)
+            user = reset_token.user
+            user.set_password(new_password)
+            user.save()
+            reset_token.delete()
+            return Response({"message": "Password reset successfully"}, status=status.HTTP_200_OK)
+        except PasswordResetToken.DoesNotExist:
             return Response({"error": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
