@@ -5,6 +5,7 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .models import JobApplication
+from jobs.models import JobPosting
 from .serializers import JobApplicationSerializer
 from authentication.permissions import IsJobSeeker, IsEmployer, IsAdminUser  # Adjust import path as needed
 from .tasks import send_application_submitted_email, send_application_accepted_email
@@ -349,3 +350,24 @@ class JobApplicationDetail(generics.RetrieveUpdateAPIView):
             serializer (JobApplicationSerializer): The serializer instance with validated data.
         """
         serializer.save()
+
+class JobApplicationsView(generics.ListAPIView):
+    """
+    A view for retrieving all applications to a specific job.
+
+    This view allows an employer to see all applications to a particular job posted by him
+    Only Employers and Admin can access this view
+    """
+    serializer_class = JobApplicationSerializer
+    permission_classes = [permissions.IsAuthenticated, IsEmployer or IsAdminUser]
+
+    def get_queryset(self):
+        job_id = self.kwargs.get('job_id')  # Safely get job_id
+        if not job_id:
+            return JobApplication.objects.none()  # Return empty if no job_id
+        user = self.request.user
+        try:
+            job = JobPosting.objects.get(id=job_id, employer=user)
+            return JobApplication.objects.filter(job=job)
+        except JobPosting.DoesNotExist:
+            return JobApplication.objects.none()

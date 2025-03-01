@@ -78,8 +78,8 @@ class JobPosting(models.Model):
     class Meta:
         """Metadata for the JobPosting model."""
         indexes = [
+            models.Index(fields=['employer']),
             models.Index(fields=['category']),  # Index on category ENUM
-            models.Index(fields=['location']),  # Index on location ForeignKey
-            models.Index(fields=['category', 'job_type']),  # Composite index
+            models.Index(fields=['is_active']),  # Index on location ForeignKey
             models.Index(fields=['created_at']),  # For sorting by recency
         ]

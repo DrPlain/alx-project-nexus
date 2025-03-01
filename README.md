@@ -73,6 +73,8 @@ The Job Board Backend is a case study in creating a scalable, feature-rich backe
 
 3. **Create a .env file in the project root using the sample below** 
    ```plaintext
+   # DJANGO SETUP
+   DJANGO_SECRET_KEY=django-insecure-cmts8c-*k(z)o9bawvef=mb=6$b5(zvrpqqwj)s9k)95+o%vcb
    # PostgreSQL Configuration
    POSTGRES_DB=job_board_db
    POSTGRES_USER=job_board_user
@@ -83,6 +85,9 @@ The Job Board Backend is a case study in creating a scalable, feature-rich backe
    REDIS_PASSWORD=redis_password
    CELERY_BROKER_URL=redis://:redis_password@redis:6379/0
    CELERY_RESULT_BACKEND=redis://:redis_password@redis:6379/0
+
+   # Caching backend
+   CACHE_REDIS_URL=redis://:redis_password@redis:6379/1
 
    # Email Configuration (e.g., Gmail SMTP)
    EMAIL_HOST_USER=your-email@gmail.com
