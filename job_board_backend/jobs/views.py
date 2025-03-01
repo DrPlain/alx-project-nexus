@@ -155,6 +155,8 @@ class JobPostingDetailView(generics.RetrieveUpdateDestroyAPIView):
         """
         if self.request.method in ['PUT', 'PATCH', 'DELETE']:
             return [IsAuthenticated(), IsEmployer(), IsJobOwner()]  # Only job owner can update/delete
+        elif self.request.user.role == 'employer':
+            return [IsAuthenticated(), IsJobOwner()]
         return [IsAuthenticated()]  # Anyone authenticated can retrieve
 
     def get_queryset(self):
