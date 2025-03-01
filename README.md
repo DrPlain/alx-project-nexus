@@ -82,12 +82,11 @@ The Job Board Backend is a case study in creating a scalable, feature-rich backe
    DATABASE_URL=postgres://job_board_user:job_board_password@db:5432/job_board_db
 
    # Redis Configuration
-   REDIS_PASSWORD=redis_password
-   CELERY_BROKER_URL=redis://:redis_password@redis:6379/0
-   CELERY_RESULT_BACKEND=redis://:redis_password@redis:6379/0
+   CELERY_BROKER_URL=redis://redis:6379/0
+   CELERY_RESULT_BACKEND=redis://redis:6379/0
 
    # Caching backend
-   CACHE_REDIS_URL=redis://:redis_password@redis:6379/1
+   CACHE_REDIS_URL=redis://redis:6379/1
 
    # Email Configuration (e.g., Gmail SMTP)
    EMAIL_HOST_USER=your-email@gmail.com
