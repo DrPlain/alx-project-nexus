@@ -37,7 +37,6 @@ INSTALLED_APPS = [
    
     'jobs',
     'applications',
-    'search',
     # Third party apps
     'rest_framework',
     'rest_framework_simplejwt',

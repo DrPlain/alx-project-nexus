@@ -97,7 +97,7 @@ class RegisterViewTest(APITestCase):
 
 class LoginViewTest(APITestCase):
     def setUp(self):
-        self.login_url = '/api/auth/login'
+        self.login_url = '/api/auth/token/'
         self.user_data = {
             'first_name': 'first_name',
             'last_name': 'last_name',
