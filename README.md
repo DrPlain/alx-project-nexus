@@ -79,7 +79,6 @@ The Job Board Backend is a case study in creating a scalable, feature-rich backe
    POSTGRES_DB=job_board_db
    POSTGRES_USER=job_board_user
    POSTGRES_PASSWORD=job_board_password
-   DATABASE_URL=postgres://job_board_user:job_board_password@db:5432/job_board_db
 
    # Redis Configuration
    CELERY_BROKER_URL=redis://redis:6379/0
