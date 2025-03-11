@@ -41,6 +41,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd job_board_backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
@@ -48,11 +49,13 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
         run: |
+          cd job_board_backend
           python manage.py migrate
 
       - name: Run tests
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
         run: |
+          cd job_board_backend
           python manage.py test
 
