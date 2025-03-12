@@ -60,7 +60,7 @@ jobs:
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
           EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
-          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_HOST: localhost
           CACHE_REDIS_URL: redis://localhost:6379/1
           REDIS_URL: redis://localhost:6379/1
           CELERY_BROKER_URL: redis://localhost:6379/0
@@ -75,7 +75,7 @@ jobs:
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
           EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
-          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_HOST: localhost
           CACHE_REDIS_URL: redis://localhost:6379/1
           REDIS_URL: redis://localhost:6379/1
           CELERY_BROKER_URL: redis://localhost:6379/0
